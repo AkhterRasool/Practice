@@ -30,16 +30,11 @@ public class QuickSort {
 		}
 	}
 
-	private static int[] generateRandomlyOrderedNumbers(int numbersInArr) {
-		Set<Integer> set = new HashSet<>();
-		int[] arr = new int[numbersInArr];	
-		for (int i = 1; i <= numbersInArr; i++) {
+	private static int[] generateRandomlyOrderedNumbers(int count) {
+		int[] arr = new int[count];	
+		for (int i = 0; i < count; i++) {
 			int randomNum = randomNumGenerator.nextInt(BOUND);
-			if (!set.contains(randomNum)) {
-				arr[i - 1] = randomNum;
-			} else {
-				i--;
-			}	
+			arr[i] = randomNum;
 		}
 		return arr;
 	}
