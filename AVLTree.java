@@ -189,7 +189,7 @@ class AVLTree {
 		} else if (nodeToDelete.hasTwoChildren()) {
 			Node smallest = getSmallest(nodeToDelete.right);
 			int smallestNum = smallest.data;
-			binaryDelete(nodeToDelete, smallest.data);	
+			parent = binaryDelete(nodeToDelete, smallest.data);	
 			nodeToDelete.data = smallestNum;
 		} else {
 			Node childOfCurr = nodeToDelete.left != null ? nodeToDelete.left : nodeToDelete.right;
@@ -199,8 +199,9 @@ class AVLTree {
 			} else if (parent == nodeToDelete) {
 				Node nodeToSwap = parent.left != null ? parent.left : parent.right;
 				int tempData = nodeToSwap.data;
-				binaryDelete(parent, tempData);
+				Node tempParent = binaryDelete(parent, tempData);
 				parent.data = tempData;
+				parent = tempParent;
 			} else if (nodeToDelete.isLeftOf(parent)) {
 				parent.left = childOfCurr;
 			} else {
