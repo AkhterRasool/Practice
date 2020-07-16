@@ -17,11 +17,21 @@ class AVLTree {
 		public boolean isLeftOf(Node node) {
 			return this.data <= node.data;
 		}
+		
+		public boolean hasOneChild() {
+			return !hasTwoChildren() && !isLeaf();
+		}
 
-		public void print() {
-			String leftData = left == null ? "Null" : String.valueOf(left.data);
-			String rightData = right == null ? "Null" : String.valueOf(right.data);
-			System.out.println(leftData + " - " + this.data + " - " + rightData);
+		public boolean hasTwoChildren() {
+			return left != null && right != null;
+		}
+
+		public boolean isLeaf() {
+			return left == null && right == null;
+		}
+
+		public Node getDirectingNode(int data) {
+			return data <= this.data ? left : right;	
 		}
 	}
 	
@@ -61,16 +71,17 @@ class AVLTree {
 	
 	public void insert(int data) {
 		Node insertedNode = binaryInsert(data);
-		Stack<Node> ancestors = getAllAncestors(insertedNode);
-		Node rotatedNode = null;
+		balanceAncestors(getAllAncestors(insertedNode), insertedNode.data);
+	}
+
+	public void balanceAncestors(Stack<Node> ancestors, int data) {
 		while (!ancestors.isEmpty()) {
 			Node parent = ancestors.pop();
 			if (!isBalanced(parent)) {
-				String rotation = getRotationType(parent, insertedNode.data);
-				rotatedNode = rotate(parent, rotation);
-				Node grandParent = null;
+				String rotation = getRotationType(parent, data);
+				Node rotatedNode = rotate(parent, rotation);
 				try {
-					grandParent =  ancestors.peek();
+					Node grandParent =  ancestors.peek();
 					if (parent.isLeftOf(grandParent)) { 
 						grandParent.left = rotatedNode;
 					} else {
@@ -88,9 +99,9 @@ class AVLTree {
 		if (node != null) {
 			int hl = getHeight(node.left);
 			int hr = getHeight(node.right);
-			bf = Math.abs(hl - hr);
+			bf = hl - hr;
 		}
-		return bf == 1 || bf == 0;
+		return bf == 1 || bf == 0 || bf == -1;
 	}
 
 	private int getHeight(Node node) {
@@ -145,7 +156,7 @@ class AVLTree {
 		Node parent = avlRoot;
 		Node curr = null;
 		do {
-			curr = data <= parent.data ? parent.left : parent.right;
+			curr = parent.getDirectingNode(data);
 			if (curr != null) {
 				parent = curr;
 			}
@@ -157,6 +168,54 @@ class AVLTree {
 		}
 
 		return node;
+	}
+	
+	public void delete(int data) {
+		Node effectedNode = binaryDelete(this.avlRoot, data);
+		if (effectedNode != null) {
+			balanceAncestors(getAllAncestors(effectedNode), data);
+		}
+	}	
+
+	private Node binaryDelete(Node parent, int data) {
+		Node nodeToDelete = parent.data == data ? parent : parent.getDirectingNode(data);
+		while (nodeToDelete != null && nodeToDelete.data != data) {
+			parent = nodeToDelete;
+			nodeToDelete = parent.getDirectingNode(data);
+		}
+
+		if (nodeToDelete == null) {
+			return null;
+		} else if (nodeToDelete.hasTwoChildren()) {
+			Node smallest = getSmallest(nodeToDelete.right);
+			int smallestNum = smallest.data;
+			binaryDelete(nodeToDelete, smallest.data);	
+			nodeToDelete.data = smallestNum;
+		} else {
+			Node childOfCurr = nodeToDelete.left != null ? nodeToDelete.left : nodeToDelete.right;
+			if (parent.isLeaf()) { 
+				this.avlRoot = null;
+				parent = null;
+			} else if (parent == nodeToDelete) {
+				Node nodeToSwap = parent.left != null ? parent.left : parent.right;
+				int tempData = nodeToSwap.data;
+				binaryDelete(parent, tempData);
+				parent.data = tempData;
+			} else if (nodeToDelete.isLeftOf(parent)) {
+				parent.left = childOfCurr;
+			} else {
+				parent.right = childOfCurr;
+			}
+		}	
+		return parent;
+	}
+
+	public Node getSmallest(Node parent) {
+		if (parent != null) 
+			while (parent.left != null)	
+				parent = parent.left;
+
+		return parent; 
 	}
 
 	/*	ROTATIONS HERE		*/

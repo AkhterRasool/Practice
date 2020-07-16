@@ -2,12 +2,20 @@ import java.util.*;
 
 public class AVLSolution {
 	public static void main(String[] args) {
-			Set<Integer> keys = getRandomUniqueElements(60);
+			Scanner scanner = new Scanner(System.in);
+			System.out.print("Enter total elements\t");
+			int total = scanner.nextInt();
+			Set<Integer> keys = getRandomUniqueElements(total);
 			System.out.println("Adding the following elements:");
 			System.out.println(keys.toString());
 			AVLTree avlTree = new AVLTree();
 			keys.forEach(avlTree::insert);		
-			avlTree.printInorder();
+			avlTree.printBFS();
+			System.out.print("Enter value to delete: \t");
+			int toDelete = scanner.nextInt();
+			System.out.println("Node to delete: " + toDelete);
+			avlTree.delete(toDelete);
+			avlTree.printBFS();
 	}
 
 
