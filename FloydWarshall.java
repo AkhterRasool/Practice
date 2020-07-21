@@ -1,5 +1,4 @@
 import java.util.Stack;
-import java.util.Arrays;
 
 public class FloydWarshall {
 	
@@ -25,13 +24,13 @@ public class FloydWarshall {
 	}
 
 	private static void printShortestPathForAllPairs(int[][] origMatrix, int[][] minCostMatrix) {
-		for (int row = 0; row < minCostMatrix.length; row++) {
-			for (int col = 0; col < minCostMatrix.length; col++) {
-				if (row != col) {
+		for (int startVertex = 0; startVertex < minCostMatrix.length; startVertex++) {
+			for (int endVertex = 0; endVertex < minCostMatrix.length; endVertex++) {
+				if (startVertex != endVertex) {
 					Stack<Integer> path = new Stack<>();
-					path.push(row + 1);
-					fillShortestPath(origMatrix, row, col, minCostMatrix[row][col], path);
-					System.out.print(String.format("(%d, %d) == ", row + 1, col + 1));
+					path.push(startVertex + 1);
+					fillShortestPath(origMatrix, startVertex, endVertex, minCostMatrix[startVertex][endVertex], path);
+					System.out.print(String.format("(%d, %d) == ", startVertex + 1, endVertex + 1));
 					System.out.println(path.toString().replaceAll(", ", " -> "));
 				}
 			}
@@ -39,14 +38,14 @@ public class FloydWarshall {
 	}	
 
 	private static void fillShortestPath(int[][] origMatrix, int sourceVertex, int destVertex, int shortestDistance, Stack<Integer> path) {
-		for (int col = 0; col < origMatrix.length; col++) {	
-			if (col != sourceVertex && origMatrix[sourceVertex][col] != NO_PATH) {
-				int remainingDistance = shortestDistance - origMatrix[sourceVertex][col];
+		for (int endVertex = 0; endVertex < origMatrix.length; endVertex++) {	
+			if (endVertex != sourceVertex && origMatrix[sourceVertex][endVertex] != NO_PATH) {
+				int remainingDistance = shortestDistance - origMatrix[sourceVertex][endVertex];
 				if (remainingDistance >= 0) {
-					path.push(col + 1);
-					if (remainingDistance == 0 && col == destVertex) break;
-					fillShortestPath(origMatrix, col, destVertex, remainingDistance, path);
-					if (path.peek() == (col + 1)) { //No new path was found, so we pop in order to backtrack. 
+					path.push(endVertex + 1);
+					if (remainingDistance == 0 && endVertex == destVertex) break;
+					fillShortestPath(origMatrix, endVertex, destVertex, remainingDistance, path);
+					if (path.peek() == (endVertex + 1)) { //No new path was found, so we pop in order to backtrack. 
 						path.pop();
 					}
 				}
@@ -58,14 +57,14 @@ public class FloydWarshall {
 		int[][] minCostMatrix = origMatrix;
 		for (int intermediateVertex = 0; intermediateVertex < minCostMatrix.length; intermediateVertex++) {
 			int[][] newMatrix = new int[minCostMatrix.length][minCostMatrix.length];
-			for (int row = 0; row < newMatrix.length; row++) {
-				for (int col = 0; col < newMatrix[row].length; col++) {
-					if (col == intermediateVertex) {
-						newMatrix[row][col] = minCostMatrix[row][col];
-					} else if (col != row) {
-						int directDistance = minCostMatrix[row][col];
-						int intermediateDistance = minCostMatrix[row][intermediateVertex] + minCostMatrix[intermediateVertex][col];
-						newMatrix[row][col] = Math.min(directDistance, intermediateDistance);
+			for (int startVertex = 0; startVertex < newMatrix.length; startVertex++) {
+				for (int endVertex = 0; endVertex < newMatrix[startVertex].length; endVertex++) {
+					if (endVertex == intermediateVertex) {
+						newMatrix[startVertex][endVertex] = minCostMatrix[startVertex][endVertex];
+					} else if (endVertex != startVertex) {
+						int directDistance = minCostMatrix[startVertex][endVertex];
+						int intermediateDistance = minCostMatrix[startVertex][intermediateVertex] + minCostMatrix[intermediateVertex][endVertex];
+						newMatrix[startVertex][endVertex] = Math.min(directDistance, intermediateDistance);
 					}
 				}
 			}
